@@ -12,9 +12,7 @@ const {
   updateTour,
   deleteTour,
   getTourStats,
-  getMonthlyPlan,
-  getToursWihtin,
-  getDistances
+  getMonthlyPlan
 } = require('./../controllers/tourController');
 
 // const { createReview } = require('./../controllers/reviewController');
@@ -41,13 +39,6 @@ router.route('/tour-stats').get(getTourStats);
 router
   .route('/monthly-plan/:year')
   .get(protect, restrictTo('admin', 'lead-guide', 'guide'), getMonthlyPlan);
-//====================================================================================
-
-router
-  .route('/perimeter/:distance/center/:latlon/unit/:unit')
-  .get(getToursWihtin); // Vídeo 170
-
-router.route('/distances/:latlon/unit/:unit').get(getDistances); // Vídeo 171
 
 router
   .route('/')

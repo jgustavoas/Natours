@@ -1,7 +1,6 @@
 const Tour = require('./../models/tourModel');
 const catchAsyncErrors = require('./../utils/catchAsync');
 const factory = require('./handlerFactory');
-const AppError = require('./../utils/appError');
 
 exports.aliasTopTours = async (req, res, next) => {
   req.query.limit = 5;
@@ -115,77 +114,4 @@ exports.getMonthlyPlan = catchAsyncErrors(async (req, res, next) => {
   //     message: error
   //   });
   // }
-});
-
-exports.getToursWihtin = catchAsyncErrors(async (req, res, next) => {
-  const { distance, latlon, unit } = req.params;
-  const [lat, lon] = latlon.split(',');
-
-  // "radius" é a medida usada pelo MongoDB. Seu valor é definido em função da circunferência da Terra.
-  // Essa circunferência em milhas é 3963.2, em quilêmetros ela é 6378.1
-  const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
-
-  if (!lat || !lon)
-    next(
-      new AppError(
-        'Please provide latitude and longitude in the format "lat,lon".',
-        400
-      )
-    );
-
-  const tours = await Tour.find({
-    startLocation: { $geoWithin: { $centerSphere: [[lon, lat], radius] } }
-  });
-
-  console.log(distance, lat, lon, unit);
-
-  res.status(200).json({
-    status: 'success',
-    results: tours.length,
-    data: {
-      data: tours
-    }
-  });
-});
-
-exports.getDistances = catchAsyncErrors(async (req, res, next) => {
-  const { latlon, unit } = req.params;
-  const [lat, lon] = latlon.split(',');
-
-  const multiplier = unit === 'mi' ? 0.000621371 : 0.001;
-
-  if (!lat || !lon)
-    next(
-      new AppError(
-        'Please provide latitude and longitude in the format "lat,lon".',
-        400
-      )
-    );
-
-  // Aggregation pipeline
-  const distances = await Tour.aggregate([
-    {
-      $geoNear: {
-        near: {
-          type: 'Point',
-          coordinates: [lon * 1, lat * 1]
-        },
-        distanceField: 'distance',
-        distanceMultiplier: multiplier
-      }
-    },
-    {
-      $project: {
-        distance: 1,
-        name: 1
-      }
-    }
-  ]);
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      data: distances
-    }
-  });
 });

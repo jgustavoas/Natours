@@ -2,6 +2,8 @@ const fs = require('fs');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const Tour = require('./../../models/tourModel');
+const User = require('./../../models/userModel');
+const Review = require('./../../models/reviewModel');
 
 // Obtendo as variáveis de ambiente em "config.env"
 // Uma vez iniciado o servidor, o node grava os dados, dispensando a necessidade do arquivo.
@@ -23,15 +25,22 @@ mongoose
   .then(() => console.log('Database connection successful!'));
 
 // READ JSON FILE
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/tours-simple.json`, 'utf-8')
+const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`, 'utf-8'));
+const users = JSON.parse(fs.readFileSync(`${__dirname}/users.json`, 'utf-8'));
+const reviews = JSON.parse(
+  fs.readFileSync(`${__dirname}/reviews.json`, 'utf-8')
 );
 
 // IMPORT DATA INTO DATABASE COLLECTION
+// NOTA: AO IMPORTAR OS DADOS DOS USUÁRIOS DESABILITAR OS MIDDLEWARES "pre('save)" EM "userModel.js"
 const importData = async () => {
   try {
     await Tour.create(tours);
-    console.log('Data successfuly loaded!');
+    console.log('Tours data successfuly loaded!');
+    await User.create(users, { validateBeforeSave: false });
+    console.log('Users data successfuly loaded!');
+    await Review.create(reviews);
+    console.log('Reviews data successfuly loaded!');
   } catch (error) {
     console.log(error);
   }
@@ -42,7 +51,11 @@ const importData = async () => {
 const deleteData = async () => {
   try {
     await Tour.deleteMany();
-    console.log('Data successfuly deleted!');
+    console.log('Tours data successfuly deleted!');
+    await User.deleteMany();
+    console.log('Users data successfuly deleted!');
+    await Review.deleteMany();
+    console.log('Reviews data successfuly deleted!');
   } catch (error) {
     console.log(error);
   }
@@ -58,10 +71,10 @@ Ou seja, "node dev-data/data/import-dev-data.js --import" retorna a array abaixo
   '/home/gustavo/Development/natours-starter/dev-data/data/import-dev-data.js',
   '--import'
 ]
-Nessa array, os dois primeiros elementos são padrão.
-O primeiro elemnto é o caminho absoluto do executável que iniciou o processo do Node.
+Nessa array, os dois primeiros elementos são por padrão.
+O primeiro elemento é o caminho absoluto do executável que iniciou o processo do Node.
 O segundo elemento é o arquivo que está sendo executado.
-A partir de um terceiro elemento são os argumentos adicionados manualmente.
+A partir de um terceiro elemento são listados os argumentos adicionados manualmente.
 Mais informações em https://nodejs.org/dist/latest-v12.x/docs/api/process.html#process_process_argv
 */
 if (process.argv[2] === '--import') {
@@ -70,4 +83,4 @@ if (process.argv[2] === '--import') {
   deleteData();
 }
 
-// console.log(process.argv);
+// console.log(process.argv); // Para ver os argumentos.

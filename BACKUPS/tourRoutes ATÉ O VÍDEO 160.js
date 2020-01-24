@@ -6,15 +6,13 @@ const { protect, restrictTo } = require('./../controllers/authController');
 
 const {
   aliasTopTours,
+  getAllTours,
   createTour,
-  readManyTours,
-  readOneTour,
+  getTour,
   updateTour,
   deleteTour,
   getTourStats,
-  getMonthlyPlan,
-  getToursWihtin,
-  getDistances
+  getMonthlyPlan
 } = require('./../controllers/tourController');
 
 // const { createReview } = require('./../controllers/reviewController');
@@ -22,7 +20,7 @@ const {
 const reviewRoutes = require('./../routes/reviewRoutes');
 
 // MERGE PARAMS do Express: caso a rota contenha "/:tourId/reviews", usar na verdade "reviewRoutes".
-// É um middleware, na prática.
+// Um middleware na prática.
 router.use('/:tourId/reviews', reviewRoutes);
 
 // Params Middleware ===============================
@@ -34,30 +32,22 @@ Esta rota está definida na constante "router", que é uma classe "Router" do ex
 É como indicar a raiz de uma url para uma série de rotas.
 */
 
-router.route('/top-5-tours').get(aliasTopTours, readManyTours);
+router.route('/top-5-tours').get(aliasTopTours, getAllTours);
 
-// Aggregation pipeline ==============================================================
+// Aggregation pipeline =========================
+// Descobrir por que não pode ficar depois por último, antes de modules.export
 router.route('/tour-stats').get(getTourStats);
-router
-  .route('/monthly-plan/:year')
-  .get(protect, restrictTo('admin', 'lead-guide', 'guide'), getMonthlyPlan);
-//====================================================================================
-
-router
-  .route('/perimeter/:distance/center/:latlon/unit/:unit')
-  .get(getToursWihtin); // Vídeo 170
-
-router.route('/distances/:latlon/unit/:unit').get(getDistances); // Vídeo 171
+router.route('/monthly-plan/:year').get(getMonthlyPlan);
 
 router
   .route('/')
-  .get(readManyTours)
-  .post(protect, restrictTo('admin', 'lead-guide'), createTour);
+  .get(protect, getAllTours)
+  .post(createTour);
 
 router
   .route('/:id')
-  .get(readOneTour)
-  .patch(protect, restrictTo('admin', 'lead-guide'), updateTour)
+  .get(getTour)
+  .patch(updateTour)
   .delete(protect, restrictTo('admin', 'lead-guide'), deleteTour);
 // Nos middleware de "delete", primeiro protegemos a página contra usários não autenticados...
 // ...em seguida, restringimos o poder de deletar tours a dois perfis ("admin" e "lead-tour").

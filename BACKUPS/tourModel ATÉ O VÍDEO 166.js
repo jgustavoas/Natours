@@ -40,9 +40,7 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       default: 4.5,
       min: [1, 'A rating must be at least 1.0'],
-      max: [5, 'A rating cannot be higher than 5.0'],
-      set: val => Math.round(val * 10) / 10 // "set" executa uma função qualquer¹
-      // ¹Esse cálculo cria resulta num número decimal de um dígito (testar com "toFixed(1)")
+      max: [5, 'A rating cannot be higher than 5.0']
     },
     ratingsQuantity: {
       type: Number,
@@ -110,14 +108,13 @@ const tourSchema = new mongoose.Schema(
     */
     locations: [
       {
+        description: String,
         type: {
           type: String,
           default: 'Point',
           enum: ['Point']
         },
         coordinates: [Number],
-        address: String,
-        description: String,
         day: Number
       }
     ],
@@ -134,12 +131,6 @@ const tourSchema = new mongoose.Schema(
     toObject: { virtuals: true } // Indica que os campos virtuais sejam incluídos no output
   }
 );
-
-// USANDO ÍNDICES PARA MELHORAR PERFORMANCE ==========================
-// tourSchema.index({ price: 1 });
-tourSchema.index({ price: 1, ratingsAverage: -1 });
-tourSchema.index({ slug: 1 });
-tourSchema.index({ startLocation: '2dsphere' }); // Adicionado no vídeo 170 em 18:00
 
 // CAMPOS VIRTUAIS ===================================================
 tourSchema.virtual('durationWeeks').get(function() {
@@ -230,13 +221,13 @@ tourSchema.post(/^find/, function(docs, next) {
   next();
 });
 
-// AGGREGATION MIDDLEWARE (DESATIVADO NO VÍDEO 171 AOS 09:00) ====================================
-// tourSchema.pre('aggregate', function(next) {
-//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-//
-//   console.log(this.pipeline()); // "this" aponta para o objeto de "aggregate", ou seja o resultado da operação.
-//   next();
-// });
+// AGGREGATION MIDDLEWARE ========================================
+tourSchema.pre('aggregate', function(next) {
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+
+  console.log(this.pipeline()); // "this" aponta para o objeto de "aggregate", ou seja o resultado da operação.
+  next();
+});
 
 const Tour = mongoose.model('Tour', tourSchema);
 

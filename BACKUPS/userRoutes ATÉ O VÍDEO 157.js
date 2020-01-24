@@ -7,18 +7,16 @@ const {
   forgotPassword,
   resetPassword,
   protect,
-  restrictTo,
   updatePassword
 } = require('./../controllers/authController');
 const {
+  getAllUsers,
   createUser,
-  readOneUser,
-  readManyUsers,
+  getUser,
   updateUser,
   deleteUser,
   updateMyself,
-  deactivateMyself,
-  getMe
+  deactivateUser
 } = require('./../controllers/userController');
 
 /* 
@@ -32,15 +30,11 @@ router.post('/signin', signIn);
 router.post('/forgotPassword', forgotPassword);
 router.patch('/resetPassword/:token', resetPassword);
 
-router.use(protect); // Este middleware funcionará para toda rota abaixo dele.
-
 // Na rota abaixo, "My" faz referência à ação deliberada do próprio usuário logado em atualizar a senha
-router.patch('/updateMyPassword', updatePassword);
-router.patch('/updateMyself', updateMyself);
-router.get('/me', getMe, readOneUser);
-router.delete('/deactivate', deactivateMyself); // Aqui o método "delete" só indica o tipo de operação.
+router.patch('/updateMyPassword', protect, updatePassword);
 
-router.use(restrictTo('admin')); // Este middleware funcionará para toda rota abaixo dele.
+router.patch('/updateMyself', protect, updateMyself);
+router.delete('/deactivate', protect, deactivateUser); // O método "delete" só indica o tipo de operação.
 
 /* 
 Nos métodos "route()" abaixo, não é mais necessário indicar a url completa
@@ -49,13 +43,13 @@ Esta rota está definida na constante "router", que usa a classe "Router" do exp
 */
 router
   .route('/')
-  .get(readManyUsers)
+  .get(getAllUsers)
   .post(createUser);
 
 router
   .route('/:id')
-  .get(readOneUser)
-  .patch(restrictTo('admin'), updateUser)
+  .get(getUser)
+  .patch(updateUser)
   .delete(deleteUser);
 
 module.exports = router;

@@ -66,16 +66,16 @@ userSchema.pre('save', async function(next) {
   next();
 });
 
-// Query middleware para retornar somente os usuários ativos
-userSchema.pre(/^find/, function(next) {
-  this.find({ activeUser: { $ne: false } });
-  next();
-});
-
 userSchema.pre('save', function(next) {
   if (!this.isModified('password') || this.isNew) return next();
 
   this.passwordChangedAt = Date.now() - 1000; // Ver o motivo dessa subtração no vídeo 133 em 17:35
+  next();
+});
+
+// Query middleware para retornar somente os usuários ativos
+userSchema.pre(/^find/, function(next) {
+  this.find({ activeUser: { $ne: false } });
   next();
 });
 

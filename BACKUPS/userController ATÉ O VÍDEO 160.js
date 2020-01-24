@@ -1,7 +1,6 @@
 const User = require('./../models/userModel');
 const catchAsyncErrors = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
-const factory = require('./handlerFactory');
 
 // Função para filtrar os campos editáveis²
 const filterObj = (obj, ...allowedFields) => {
@@ -12,19 +11,18 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-// createUser na aplicação é o signUp em "authController"
-exports.createUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined. Please use /signUp instead.'
-  });
-};
-exports.readOneUser = factory.readOne(User);
-exports.readManyUsers = factory.readMany(User);
-exports.updateUser = factory.updateOne(User); // Do NOT update password wtih this!
-exports.deleteUser = factory.deletOne(User);
+exports.getAllUsers = catchAsyncErrors(async (req, res) => {
+  const users = await User.find();
 
-// AÇÕES FEITAS PELO PRÓPRIO USUÁRIO COM O PERFIL "tourist" =======================================
+  res.status(200).json({
+    status: 'success',
+    results: users.length,
+    data: {
+      users
+    }
+  });
+});
+
 exports.updateMyself = catchAsyncErrors(async (req, res, next) => {
   // 1. Throw error if user posts password data
   if (req.body.password || req.body.passwordConfirm)
@@ -36,8 +34,8 @@ exports.updateMyself = catchAsyncErrors(async (req, res, next) => {
     );
 
   // 2. Update user document¹
-  const filteredBody = filterObj(req.body, 'name', 'email'); // ²Motivo disso por volta de 14:00 do vídeo 138
-  const filedsToUpdate = { name: req.body.name, email: req.body.email }; // Eu preferi fazer assim.
+  const filteredBody = filterObj(req.body, 'name', 'email'); // ²Motivo disso por volta de 14:00
+  const filedsToUpdate = { name: req.body.name, email: req.body.email }; // Minha solução.
 
   const updatedUser = await User.findByIdAndUpdate(
     req.user.id,
@@ -62,7 +60,8 @@ exports.updateMyself = catchAsyncErrors(async (req, res, next) => {
     }
   });
 });
-exports.deactivateMyself = catchAsyncErrors(async (req, res, next) => {
+
+exports.deactivateUser = catchAsyncErrors(async (req, res, next) => {
   await User.findByIdAndUpdate(req.user.id, { activeUser: false });
 
   res.status(204).json({
@@ -71,8 +70,27 @@ exports.deactivateMyself = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-// Esta ação foi implementada no vídeo 163:
-exports.getMe = (req, res, next) => {
-  req.params.id = req.user.id;
-  next();
+exports.createUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined'
+  });
+};
+exports.getUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined'
+  });
+};
+exports.updateUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined'
+  });
+};
+exports.deleteUser = (req, res) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not yet defined'
+  });
 };

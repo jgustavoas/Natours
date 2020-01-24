@@ -1,6 +1,6 @@
 const Tour = require('./../models/tourModel');
+const APIFeatures = require('./../utils/apiFeatures');
 const catchAsyncErrors = require('./../utils/catchAsync');
-const factory = require('./handlerFactory');
 const AppError = require('./../utils/appError');
 
 exports.aliasTopTours = async (req, res, next) => {
@@ -11,11 +11,128 @@ exports.aliasTopTours = async (req, res, next) => {
 };
 
 // Controllers CRUD
-exports.createTour = factory.createOne(Tour);
-exports.readManyTours = factory.readMany(Tour);
-exports.readOneTour = factory.readOne(Tour, { path: 'reviews' });
-exports.updateTour = factory.updateOne(Tour);
-exports.deleteTour = factory.deletOne(Tour);
+exports.getAllTours = catchAsyncErrors(async (req, res, next) => {
+  const features = new APIFeatures(Tour.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+
+  const tours = await features.query;
+
+  res.status(200).json({
+    status: 'success',
+    results: tours.length,
+    data: {
+      tours
+    }
+  });
+
+  // try {
+  // } catch (err) {
+  //   res.status(404).json({
+  //     status: 'fail',
+  //     message: err
+  //   });
+  // }
+});
+
+exports.getTour = catchAsyncErrors(async (req, res, next) => {
+  const tour = await Tour.findById(req.params.id).populate('reviews');
+
+  if (!tour) {
+    return next(new AppError('No tour found with that ID', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: { tour }
+  });
+
+  // try {
+  // } catch (err) {
+  //   res.status(400).json({
+  //     status: 'fail',
+  //     message: err
+  //   });
+  // }
+});
+
+// Implementado no vídeo 115 e depois inserido num arquivo externo em './../utils/catchAsync.js'
+/* 
+  const catchAsyncErrors = fn => {
+  return (req, res, next) => {
+    fn(req, res, next).catch(next);
+  };
+};
+*/
+
+exports.createTour = catchAsyncErrors(async (req, res, next) => {
+  const newTour = await Tour.create(req.body);
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      tour: newTour
+    }
+  });
+
+  // try {
+  // } catch (err) {
+  //   res.status(400).json({
+  //     status: 'fail',
+  //     message: err
+  //   });
+  // }
+});
+
+exports.updateTour = catchAsyncErrors(async (req, res, next) => {
+  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true
+  });
+
+  if (!tour) {
+    return next(new AppError('No tour found with that ID', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      tour
+    }
+  });
+
+  // try {
+  // } catch (err) {
+  //   res.status(400).json({
+  //     status: 'fail',
+  //     message: err
+  //   });
+  // }
+});
+
+exports.deleteTour = catchAsyncErrors(async (req, res, next) => {
+  const tour = await Tour.findByIdAndDelete(req.params.id);
+
+  if (!tour) {
+    return next(new AppError('No tour found with that ID', 404));
+  }
+
+  res.status(204).json({
+    // 204 ("No content") é um código de status usado ao deletar
+    status: 'success',
+    data: null // Aqui uma diferença, não se costuma retornar dados depois que estes são deletados
+  });
+
+  // try {
+  // } catch (err) {
+  //   res.status(401).json({
+  //     status: 'fail',
+  //     message: err
+  //   });
+  // }
+});
 
 // AGGREGATION PIPELINE =============================================
 // Mais informações em:
@@ -115,77 +232,4 @@ exports.getMonthlyPlan = catchAsyncErrors(async (req, res, next) => {
   //     message: error
   //   });
   // }
-});
-
-exports.getToursWihtin = catchAsyncErrors(async (req, res, next) => {
-  const { distance, latlon, unit } = req.params;
-  const [lat, lon] = latlon.split(',');
-
-  // "radius" é a medida usada pelo MongoDB. Seu valor é definido em função da circunferência da Terra.
-  // Essa circunferência em milhas é 3963.2, em quilêmetros ela é 6378.1
-  const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
-
-  if (!lat || !lon)
-    next(
-      new AppError(
-        'Please provide latitude and longitude in the format "lat,lon".',
-        400
-      )
-    );
-
-  const tours = await Tour.find({
-    startLocation: { $geoWithin: { $centerSphere: [[lon, lat], radius] } }
-  });
-
-  console.log(distance, lat, lon, unit);
-
-  res.status(200).json({
-    status: 'success',
-    results: tours.length,
-    data: {
-      data: tours
-    }
-  });
-});
-
-exports.getDistances = catchAsyncErrors(async (req, res, next) => {
-  const { latlon, unit } = req.params;
-  const [lat, lon] = latlon.split(',');
-
-  const multiplier = unit === 'mi' ? 0.000621371 : 0.001;
-
-  if (!lat || !lon)
-    next(
-      new AppError(
-        'Please provide latitude and longitude in the format "lat,lon".',
-        400
-      )
-    );
-
-  // Aggregation pipeline
-  const distances = await Tour.aggregate([
-    {
-      $geoNear: {
-        near: {
-          type: 'Point',
-          coordinates: [lon * 1, lat * 1]
-        },
-        distanceField: 'distance',
-        distanceMultiplier: multiplier
-      }
-    },
-    {
-      $project: {
-        distance: 1,
-        name: 1
-      }
-    }
-  ]);
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      data: distances
-    }
-  });
 });
