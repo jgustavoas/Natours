@@ -22,7 +22,8 @@
 }
 
 html {
-  font-size: 62.5%;
+  /* font-size: 62.5%; ESSA PORCETAGEM FEZ UMA QUEBRA DE LINHA NO BOTÃO "SIGN UP" DO HEADER */
+  font-size: 60%;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
@@ -32,7 +33,7 @@ body {
   font-weight: 300;
   font-family: 'Lato', sans-serif;
   color: #777;
-  padding: 3rem;
+  padding: 0rem; /* Mudei de 3 para 0 a fim de deixar o corpo do site ocupando todo o espaço da página. */
   min-height: 100vh;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -149,7 +150,7 @@ body {
 .heading-primary span,
 .heading-tertirary span {
   padding: 1rem 1.5rem;
-  line-height: 1;
+  line-height: 1.5;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
   background-image: -webkit-gradient(
@@ -376,7 +377,7 @@ body {
     to(#28b487)
   );
   background-image: linear-gradient(to right bottom, #7dd56f, #28b487);
-  opacity: 0.85;
+  opacity: 0; /* 0.85 era o valor original */
 }
 
 .heading-box {
@@ -504,6 +505,7 @@ body {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  height: 38vw;
   clip-path: polygon(
     0 var(--section-rotate),
     100% 0,
@@ -1116,7 +1118,7 @@ body {
     to(#28b487)
   );
   background-image: linear-gradient(to right bottom, #7dd56f, #28b487);
-  opacity: 0.7;
+  opacity: 0; /* Mudei de 0.7 para 0 a fim de deixa as fotos com as cores naturais. */
 }
 .card__picture-img {
   -o-object-fit: cover;
