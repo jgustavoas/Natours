@@ -25,9 +25,11 @@ const DB = process.env.REMOTE_DATABASE.replace(
   process.env.REMOTE_PASSWORD
 );
 
+const localDB = process.env.LOCAL_DATABASE;
+const useRemoteDB = false;
+
 mongoose
-  .connect(DB, {
-    //.connect(process.env.LOCAL_DATABASE, { esta linha caso queira usar o banco de dados local.
+  .connect(useRemoteDB === true ? DB : localDB, {
     useNewUrlParser: true,
     useCreateIndex: true,
     useFindAndModify: false,
