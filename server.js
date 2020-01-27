@@ -1,6 +1,6 @@
 const dotenv = require('dotenv');
 // Obtendo as variáveis de ambiente em "config.env"
-// Uma vez iniciado o servidor, o node grava os dados, dispensando a necessidade do arquivo.
+// Uma vez iniciado o servidor, o Node grava os dados, dispensando a necessidade do arquivo.
 dotenv.config({ path: './config.env' });
 
 /*
@@ -34,7 +34,7 @@ mongoose
     useCreateIndex: true,
     useFindAndModify: false,
     useUnifiedTopology: true // Esta última opção foi inserida devido a um aviso do node:
-    /* AVISO AO RODAR "npm start" ==========================================================
+    /* AVISO AO RODAR "npm start" ==================================================================
     (node:27402) DeprecationWarning: current Server Discovery and Monitoring engine is deprecated, 
     and will be removed in a future version. 
     To use the new Server Discover and Monitoring engine, pass option { useUnifiedTopology: true } 
@@ -52,7 +52,7 @@ const server = app.listen(port, () => {
 // You must install peer dependencies yourself.
 
 /*
-VÍDEO 121: ERRORS OUTSIDE EXPRESS: UNHANDLED REJECTIONS
+VÍDEO 121: ERRORS OUTSIDE EXPRESS: UNHANDLED REJECTIONS ============================================
 // Escutando o evento "unhandledRejection" para qualquer ocorrência.
 // Na aula, um erro de conexão com o MongoDB foi simulado alterando o a variável REMOTE_PASSWORD
 */
@@ -63,5 +63,3 @@ process.on('unhandledRejection', err => {
     process.exit(1);
   });
 });
-
-// console.log(x);
