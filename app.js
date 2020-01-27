@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
@@ -5,16 +6,25 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const cookieParser = require('cookie-parser');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const viewRouter = require('./routes/viewRoutes');
 
 const app = express();
 
-// GLOBAL MIDDLEWARES
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views')); // ¹
+// ¹Motivo do formato "path.join(__dirname, 'views')" no vídeo 175 aos 03:50
+
+// 1.GLOBAL MIDDLEWARES ==============================================================================
+// Serving static files
+app.use(express.static(path.join(__dirname, 'public'))); // ²como em ¹ e movido da metade do arquivo pra cá.
+
 // Set security HTTP
 app.use(helmet()); // É importante este middleware estar no topo.
 
@@ -34,6 +44,9 @@ app.use('/api', limiter);
 
 // Renderização de arquivos estáticos (body parser) como limite de tamanho
 app.use(express.json({ limit: '10kb' }));
+
+// Parsing cookie
+app.use(cookieParser());
 
 // Data sanitization against noSQL query injection
 app.use(mongoSanitize());
@@ -57,7 +70,7 @@ app.use(
 // Exemplo: /tours?sort=price&sort=duration (consiera o último parâmetro)
 
 // Serving static files
-app.use(express.static(`${__dirname}/public`)); // localhost:3000/overview.html (ou outro arquivo da pasta "public")
+// ²app.use(express.static(`${__dirname}/public`)); // localhost:3000/overview.html (ou outro arquivo da pasta "public")
 
 /* USADO COMO EXEMPLO SIMPLES DE MIDDLEWARE
 app.use((req, res, next) => {
@@ -69,11 +82,14 @@ app.use((req, res, next) => {
 // Middleware usado como teste
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+  console.log(req.cookies);
   next();
 });
+// =================================================================================================
 
-// Aqui um pequeno middleware para as rotas "tour" e "user"
-// Esse recurso é chamado de "mounting routes"
+// 2.ROUTES MIDDLEWARES ============================================================================
+// Mounting routes ---------------------------------------------------------------------------------
+app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
@@ -105,11 +121,13 @@ app.all('*', (req, res, next) => {
   // Ele SEMPRE irá lançar o erro (passado como parâmetro em "next") dentro do middleware de error handling.
   // O middleware de error handling é SEMPRE aquele com quatro parâmetros, sendo o primeiro parâmetro o do erro.
 });
+// =================================================================================================
 
-/* VÍDEO 113: IMPLEMENTING A GLOBAL ERROR HANDLING MIDDLEWARE
+// 3.ERROR HANDLING MIDDLEWARE =====================================================================
+// VÍDEO 113
 // O Express reconhece uma função com quatro parâmetros como um middleware de error handling...
 // ...com o primeiro parâmetro sendo SEMPRE o de erro.
-*/
 app.use(globalErrorHandler);
+//==================================================================================================
 
 module.exports = app;
