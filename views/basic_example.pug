@@ -1,0 +1,24 @@
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    meta(http-equiv="X-UA-Compatible", content="ie=edge")
+    title Natours | #{tour} #{9*2}
+    //- #{variável} é como ${variável} em javascript, permite concatenar texto com javascript.
+    link(rel="stylesheet", href="css/style.css")
+    link(rel="shortcut icon", href="img/favicon.png", type="image/png")
+  body
+    //- o sinal de igual junto ao elemento permite inserir javascript dentro do elemento:
+    h1= tour
+    h1= tour.toUpperCase()
+    // h1 The Park Camper
+    //- p This is some text (este comentário é invisível na renderização).
+
+    //- Renderizando variáveis javascript vindas da API
+    p= user
+
+    //- Usando javascript direto no arquivo:
+    - const x = 9
+    p= 2 * x
+
+    //- "| " (pipeline + space) adiciona espaço entre um elemento abaixo do outro na renderização.
