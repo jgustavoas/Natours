@@ -30,19 +30,19 @@ app.use(helmet()); // É importante este middleware estar no topo.
 
 // Development logging
 if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev')); // Utilidade questionável
+  app.use(morgan('dev'));
 }
 
 // Limit request from same API
 const limiter = rateLimit({
   max: 100, // máximo de 100 requests do mesmo IP num intervalo de 1h (definido abaixo);
   windowMs: 60 * 60 * 1000, // 1 hora = 60 (minutos) * 60 (segundos) * 1000 (milisegundos)
-  // 1000 milimisegundos = 1 segundo; 1s * 60 = 1 minuto; 1min * 60 = 1h; 1h * 24 = 1d.
+  // 1000 milisegundos = 1 segundo; 1s * 60 = 1 minuto; 1min * 60 = 1h; 1h * 24 = 1d.
   message: 'Too many requests from this IP. Please try again in one hour.'
 });
 app.use('/api', limiter);
 
-// Renderização de arquivos estáticos (body parser) como limite de tamanho
+// Renderização de arquivos estáticos (body parser) com limite de tamanho
 app.use(express.json({ limit: '10kb' }));
 
 // Parsing cookie
@@ -67,7 +67,7 @@ app.use(
     ]
   })
 ); // evita confusão caso existam, por exemplo, parâmetros duplicados na URL.
-// Exemplo: /tours?sort=price&sort=duration (consiera o último parâmetro)
+// Exemplo: "/tours?sort=price&sort=duration" consideraria o último parâmetro
 
 // Serving static files
 // ²app.use(express.static(`${__dirname}/public`)); // localhost:3000/overview.html (ou outro arquivo da pasta "public")
@@ -82,7 +82,7 @@ app.use((req, res, next) => {
 // Middleware usado como teste
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  console.log(req.cookies);
+  // console.log(req.cookies);
   next();
 });
 // =================================================================================================
@@ -116,7 +116,8 @@ app.all('*', (req, res, next) => {
   // err.status = 'fail';
   // err.statusCode = 404; // ERRO CRIADO ARTIFICIALMENTE PARA TESTES
 
-  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404)); // QUALQUER parâmetro passado dentro de next() é considerado como o de erro pelo Express.
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+  // QUALQUER parâmetro passado dentro de next() é considerado como o de erro pelo Express.
   // Esse parâmetro de erro pode estar em QUALQUER middleware em qualquer linha do código da aplicação.
   // Ele SEMPRE irá lançar o erro (passado como parâmetro em "next") dentro do middleware de error handling.
   // O middleware de error handling é SEMPRE aquele com quatro parâmetros, sendo o primeiro parâmetro o do erro.

@@ -36,12 +36,12 @@ Esta rota está definida na constante "router", que é uma classe "Router" do ex
 
 router.route('/top-5-tours').get(aliasTopTours, readManyTours);
 
-// Aggregation pipeline ==============================================================
+// Aggregation pipeline ============================================================================
 router.route('/tour-stats').get(getTourStats);
 router
   .route('/monthly-plan/:year')
   .get(protect, restrictTo('admin', 'lead-guide', 'guide'), getMonthlyPlan);
-//====================================================================================
+//==================================================================================================
 
 router
   .route('/perimeter/:distance/center/:latlon/unit/:unit')
@@ -59,11 +59,11 @@ router
   .get(readOneTour)
   .patch(protect, restrictTo('admin', 'lead-guide'), updateTour)
   .delete(protect, restrictTo('admin', 'lead-guide'), deleteTour);
-// Nos middleware de "delete", primeiro protegemos a página contra usários não autenticados...
+// Nos middlewares de "delete", primeiro protegemos a página contra usários não autenticados...
 // ...em seguida, restringimos o poder de deletar tours a dois perfis ("admin" e "lead-tour").
 
 // VÍDEO 157: ======================================================================================
-// ABAIXO, DEMONSTRAÇÃO DO FUNCIONAMENTO DE NESTED ROUTES, SUBSTITUÍDO POR "MERGE PARAMS" DO EXPRESS
+// DEMONSTRAÇÃO DO FUNCIONAMENTO DE NESTED ROUTES, SUBSTITUÍDO POR "MERGE PARAMS" DO EXPRESS:
 // router
 //   .route('/:tourId/reviews')
 //   .post(protect, restrictTo('tourist'), createReview);

@@ -60,7 +60,7 @@ userSchema.pre('save', async function(next) {
   this.password = await bcrypt.hash(this.password, 12);
 
   // Como a validação é feita pelo MongoDB, o campo passwordConfirm é utilizado.
-  // Porém, após a validação e a encriptação, esse campo não é mais necessário estar no banco de dados.
+  // Porém, após a validação e a encriptação, esse campo não é mais necessário no banco de dados.
   this.passwordConfirm = undefined;
 
   next();

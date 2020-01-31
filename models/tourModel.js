@@ -92,7 +92,7 @@ const tourSchema = new mongoose.Schema(
     // "startLocation" é de onde parte o tour.
     startLocation: {
       description: String,
-      // MongoDB usa um formato que ele chama de GeoJSON para armazenar coordenadas geográficos
+      // MongoDB usa um formato que ele chama de GeoJSON para armazenar coordenadas geográficas
       // Note que aqui "type" é um objeto, diferente dos outros campos ateriores a "startLocation"
       type: {
         type: String,
@@ -135,13 +135,13 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
-// USANDO ÍNDICES PARA MELHORAR PERFORMANCE ==========================
+// USANDO ÍNDICES PARA MELHORAR PERFORMANCE ========================================================
 // tourSchema.index({ price: 1 });
 tourSchema.index({ price: 1, ratingsAverage: -1 });
 tourSchema.index({ slug: 1 });
 tourSchema.index({ startLocation: '2dsphere' }); // Adicionado no vídeo 170 em 18:00
 
-// CAMPOS VIRTUAIS ===================================================
+// CAMPOS VIRTUAIS =================================================================================
 tourSchema.virtual('durationWeeks').get(function() {
   // Não foi usado arrow function por causa do uso do "this"
   return this.duration / 7;
@@ -149,8 +149,8 @@ tourSchema.virtual('durationWeeks').get(function() {
 /* NOTAS: 
   1) Campos virtuais não podem ser usados em queries
   2) O cálculo de 'durationWeeks' poderia ser feito no controller, mas isso não é considerado boa prática
-     porque isso confude a lógica de negócio (Models) com a lógica da aplicação (Controllers).  
-     Então, aqui segue-se o conceito de "Fat Models and "Thin Controllers".
+     porque confude a lógica de negócio (Models) com a lógica da aplicação (Controllers).  
+     Então, aqui é seguido segue o conceito de "Fat Models and "Thin Controllers".
 */
 
 // VIRTUAL POPULATE (VÍDEO 156)
@@ -160,8 +160,8 @@ tourSchema.virtual('reviews', {
   localField: '_id'
 });
 
-// "DOCUMENT MIDDLEWARE" ===================================================
-// '.pre()' funciona somente antes de 'create' e 'save' e indica que é executado "antes" deles.
+// "DOCUMENT MIDDLEWARE" ===========================================================================
+// '.pre()' funciona somente antes de 'create' e de 'save', sendo executado "antes" deles.
 tourSchema.pre('save', function(next) {
   // console.log(this);
 
@@ -200,7 +200,7 @@ tourSchema.post('save', function(doc, next) {
 });
 */
 
-// QUERY MIDDLEWARE =========================================
+// QUERY MIDDLEWARE ================================================================================
 // É apenas a operação "find" que diferencia este "Query middleware" do "Document middleare" acima
 // "find" aponta para uma query e não para um documento em si, por isso a diferença.
 tourSchema.pre(/^find/, function(next) {
@@ -230,11 +230,12 @@ tourSchema.post(/^find/, function(docs, next) {
   next();
 });
 
-// AGGREGATION MIDDLEWARE (DESATIVADO NO VÍDEO 171 AOS 09:00) ====================================
+// AGGREGATION MIDDLEWARE (DESATIVADO NO VÍDEO 171 AOS 09:00) ======================================
 // tourSchema.pre('aggregate', function(next) {
 //   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
 //
-//   console.log(this.pipeline()); // "this" aponta para o objeto de "aggregate", ou seja o resultado da operação.
+//   console.log(this.pipeline());
+//   "this" aponta para o objeto de "aggregate", ou seja o resultado da operação.
 //   next();
 // });
 
